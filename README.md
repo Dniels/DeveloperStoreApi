@@ -34,7 +34,6 @@ O sistema publica os seguintes eventos de domínio:
 - **EF Core** - ORM para acesso a dados
 - **MediatR** - Implementação do padrão Mediator
 - **AutoMapper** - Mapeamento de objetos
-- **Rebus** - Service bus para messaging
 
 ### Bancos de Dados
 - **PostgreSQL** - Banco relacional principal
