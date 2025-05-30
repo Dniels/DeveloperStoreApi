@@ -239,7 +239,7 @@ A API utiliza códigos de status HTTP convencionais:
 }
 ```
 
-## 🏗 Arquitetura
+##  Arquitetura
 
 O projeto segue os princípios de **Domain-Driven Design (DDD)**:
 
