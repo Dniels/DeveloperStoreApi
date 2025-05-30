@@ -74,8 +74,7 @@ cd DeveloperStoreApi
 ```json
 {
   "ConnectionStrings": {
-    "PostgreSQL": "Host=localhost;Database=DeveloperStore;Username=user;Password=password",
-    "MongoDB": "mongodb://localhost:27017/DeveloperStore"
+      "DefaultConnection": "Server=localhost;Database=DeveloperEvaluation;User Id=sa;Password=Pass@word;TrustServerCertificate=True"
   }
 }
 ```
