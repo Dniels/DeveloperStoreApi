@@ -38,7 +38,6 @@ O sistema publica os seguintes eventos de domínio:
 
 ### Bancos de Dados
 - **PostgreSQL** - Banco relacional principal
-- **MongoDB** - Banco de documentos
 
 ### Testes
 - **xUnit** - Framework de testes unitários
