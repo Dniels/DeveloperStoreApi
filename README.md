@@ -40,8 +40,6 @@ O sistema publica os seguintes eventos de domínio:
 
 ### Testes
 - **xUnit** - Framework de testes unitários
-- **NSubstitute** - Biblioteca de mocking
-- **Bogus (Faker)** - Geração de dados para testes
 
 ##  Estrutura do Projeto
 
