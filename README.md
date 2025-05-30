@@ -1,8 +1,8 @@
-# Sales API - DeveloperStore
+# Sales API - Ambev.DeveloperEvaluation
 
 Uma API RESTful completa para gerenciamento de registros de vendas, implementada seguindo os princípios de Domain-Driven Design (DDD) e o padrão External Identities.
 
-## 📋 Funcionalidades
+##  Funcionalidades
 
 A API permite gerenciar registros de vendas com as seguintes informações:
 
@@ -26,7 +26,7 @@ O sistema publica os seguintes eventos de domínio:
 - `SaleCancelled` - Quando uma venda é cancelada
 - `ItemCancelled` - Quando um item específico é cancelado
 
-## 🔧 Tecnologias
+##  Tecnologias
 
 ### Backend
 - **.NET 8.0** - Framework principal
@@ -44,22 +44,21 @@ O sistema publica os seguintes eventos de domínio:
 - **NSubstitute** - Biblioteca de mocking
 - **Bogus (Faker)** - Geração de dados para testes
 
-## 📁 Estrutura do Projeto
+##  Estrutura do Projeto
 
 ```
 root/
 ├── src/
-│   ├── DeveloperStore.Sales.API/          # Camada de apresentação (API)
-│   ├── DeveloperStore.Sales.Application/  # Camada de aplicação
-│   ├── DeveloperStore.Sales.Domain/       # Camada de domínio
-│   └── DeveloperStore.Sales.Infrastructure/ # Camada de infraestrutura
+│   ├── Ambev.DeveloperEvaluation.WebApi/       # Camada de apresentação (API)
+│   ├── Ambev.DeveloperEvaluation.Application/  # Camada de aplicação
+│   ├── Ambev.DeveloperEvaluation.Domain/       # Camada de domínio
+│   └── Ambev.DeveloperEvaluation.ORM/          # Camada de infraestrutura
 ├── tests/
-│   ├── DeveloperStore.Sales.UnitTests/    # Testes unitários
-│   └── DeveloperStore.Sales.IntegrationTests/ # Testes de integração
+│   ├── Ambev.DeveloperEvaluation.Unit/    # Testes unitários
 └── README.md
 ```
 
-## 🚀 Como Executar
+##  Como Executar
 
 ### Pré-requisitos
 
@@ -101,7 +100,7 @@ dotnet run --project src/DeveloperStore.Sales.API
 dotnet test
 ```
 
-## 📖 API Endpoints
+##  API Endpoints
 
 ### Vendas
 
@@ -200,7 +199,7 @@ Cancela uma venda específica.
 #### POST /api/sales/{saleId}/items/{itemId}/cancel
 Cancela um item específico de uma venda.
 
-## 📋 Regras de Negócio
+##  Regras de Negócio
 
 ### Descontos por Quantidade
 
@@ -216,7 +215,7 @@ Cancela um item específico de uma venda.
 - Vendas canceladas não podem ser modificadas
 - Itens cancelados não afetam o cálculo de desconto dos demais itens
 
-## 🔄 Paginação, Filtros e Ordenação
+##  Paginação, Filtros e Ordenação
 
 ### Paginação
 ```
@@ -243,7 +242,7 @@ GET /api/sales?_minDate=2024-01-01&_maxDate=2024-12-31
 GET /api/sales?customerName=João*&_minAmount=100&_order="date desc"
 ```
 
-## 🔒 Tratamento de Erros
+##  Tratamento de Erros
 
 A API utiliza códigos de status HTTP convencionais:
 
@@ -261,7 +260,7 @@ A API utiliza códigos de status HTTP convencionais:
 }
 ```
 
-## 🏗️ Arquitetura
+## 🏗 Arquitetura
 
 O projeto segue os princípios de **Domain-Driven Design (DDD)**:
 
