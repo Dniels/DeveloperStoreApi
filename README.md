@@ -119,37 +119,42 @@ Recupera uma lista de vendas com suporte a paginação, filtros e ordenação.
 {
   "data": [
     {
-      "id": "uuid",
+      "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
       "saleNumber": "string",
-      "date": "2024-01-01T00:00:00Z",
+      "saleDate": "2025-05-30T16:07:04.742Z",
       "customer": {
-        "id": "uuid",
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
         "name": "string",
         "email": "string"
       },
       "branch": {
-        "id": "uuid",
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
         "name": "string",
         "address": "string"
       },
+      "totalAmount": 0,
+      "isCancelled": true,
       "items": [
         {
-          "productId": "uuid",
-          "productName": "string",
-          "quantity": 5,
-          "unitPrice": 100.00,
-          "discount": 10.00,
-          "totalAmount": 450.00,
-          "cancelled": false
+          "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+          "product": {
+            "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "name": "string",
+            "description": "string",
+            "category": "string"
+          },
+          "quantity": 0,
+          "unitPrice": 0,
+          "discount": 0,
+          "totalAmount": 0,
+          "isCancelled": true
         }
-      ],
-      "totalAmount": 450.00,
-      "cancelled": false
+      ]
     }
   ],
-  "totalItems": 100,
-  "currentPage": 1,
-  "totalPages": 10
+  "totalItems": 0,
+  "currentPage": 0,
+  "totalPages": 0
 }
 ```
 
@@ -159,22 +164,27 @@ Cria uma nova venda.
 **Body da Requisição:**
 ```json
 {
+  "saleNumber": "string",
   "customer": {
-    "id": "uuid",
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "name": "string",
-    "email": "string"
+    "email": "user@example.com"
   },
   "branch": {
-    "id": "uuid",
+    "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
     "name": "string",
     "address": "string"
   },
   "items": [
     {
-      "productId": "uuid",
-      "productName": "string",
-      "quantity": 5,
-      "unitPrice": 100.00
+      "product": {
+        "id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "name": "string",
+        "description": "string",
+        "category": "string"
+      },
+      "quantity": 20,
+      "unitPrice": 0.01
     }
   ]
 }
@@ -210,33 +220,6 @@ Cancela um item específico de uma venda.
 - Descontos só são aplicados automaticamente conforme as regras acima
 - Vendas canceladas não podem ser modificadas
 - Itens cancelados não afetam o cálculo de desconto dos demais itens
-
-##  Paginação, Filtros e Ordenação
-
-### Paginação
-```
-GET /api/sales?_page=2&_size=20
-```
-
-### Ordenação
-```
-GET /api/sales?_order="date desc, totalAmount asc"
-```
-
-### Filtros
-```
-# Por nome do cliente
-GET /api/sales?customerName=João*
-
-# Por faixa de valores
-GET /api/sales?_minAmount=100&_maxAmount=1000
-
-# Por período
-GET /api/sales?_minDate=2024-01-01&_maxDate=2024-12-31
-
-# Combinado
-GET /api/sales?customerName=João*&_minAmount=100&_order="date desc"
-```
 
 ##  Tratamento de Erros
 
