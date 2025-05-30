@@ -57,11 +57,11 @@
           "dependencies": {
             "AutoMapper": {
               "target": "Package",
-              "version": "[13.0.1, )"
+              "version": "[14.0.0, )"
             },
             "MediatR": {
               "target": "Package",
-              "version": "[12.4.1, )"
+              "version": "[12.5.0, )"
             },
             "OneOf": {
               "target": "Package",
@@ -141,11 +141,11 @@
             },
             "FluentValidation": {
               "target": "Package",
-              "version": "[11.10.0, )"
+              "version": "[12.0.0, )"
             },
             "MediatR": {
               "target": "Package",
-              "version": "[12.4.1, )"
+              "version": "[12.5.0, )"
             },
             "Microsoft.AspNetCore.Authentication.JwtBearer": {
               "target": "Package",
@@ -264,7 +264,7 @@
           "dependencies": {
             "FluentValidation": {
               "target": "Package",
-              "version": "[11.10.0, )"
+              "version": "[12.0.0, )"
             }
           },
           "imports": [
