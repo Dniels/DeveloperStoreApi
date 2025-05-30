@@ -3,8 +3,8 @@
   "WorkspaceRootPath": "C:\\DeveloperStoreApi\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{54E6E012-F460-4A2B-95C5-27A2EF18A713}|tests\\Ambev.DeveloperEvaluation.Unit\\Ambev.DeveloperEvaluation.Unit.csproj|c:\\developerstoreapi\\tests\\ambev.developerevaluation.unit\\builders\\salebuilder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{54E6E012-F460-4A2B-95C5-27A2EF18A713}|tests\\Ambev.DeveloperEvaluation.Unit\\Ambev.DeveloperEvaluation.Unit.csproj|solutionrelative:tests\\ambev.developerevaluation.unit\\builders\\salebuilder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{54E6E012-F460-4A2B-95C5-27A2EF18A713}|tests\\Ambev.DeveloperEvaluation.Unit\\Ambev.DeveloperEvaluation.Unit.csproj|c:\\developerstoreapi\\tests\\ambev.developerevaluation.unit\\eventhandlers\\authenticateuserhandlertests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{54E6E012-F460-4A2B-95C5-27A2EF18A713}|tests\\Ambev.DeveloperEvaluation.Unit\\Ambev.DeveloperEvaluation.Unit.csproj|solutionrelative:tests\\ambev.developerevaluation.unit\\eventhandlers\\authenticateuserhandlertests.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -31,14 +31,14 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "SaleBuilder.cs",
-              "DocumentMoniker": "C:\\DeveloperStoreApi\\tests\\Ambev.DeveloperEvaluation.Unit\\Builders\\SaleBuilder.cs",
-              "RelativeDocumentMoniker": "tests\\Ambev.DeveloperEvaluation.Unit\\Builders\\SaleBuilder.cs",
-              "ToolTip": "C:\\DeveloperStoreApi\\tests\\Ambev.DeveloperEvaluation.Unit\\Builders\\SaleBuilder.cs",
-              "RelativeToolTip": "tests\\Ambev.DeveloperEvaluation.Unit\\Builders\\SaleBuilder.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAnAAAAAAAAAA==",
+              "Title": "AuthenticateUserHandlerTests.cs",
+              "DocumentMoniker": "C:\\DeveloperStoreApi\\tests\\Ambev.DeveloperEvaluation.Unit\\EventHandlers\\AuthenticateUserHandlerTests.cs",
+              "RelativeDocumentMoniker": "tests\\Ambev.DeveloperEvaluation.Unit\\EventHandlers\\AuthenticateUserHandlerTests.cs",
+              "ToolTip": "C:\\DeveloperStoreApi\\tests\\Ambev.DeveloperEvaluation.Unit\\EventHandlers\\AuthenticateUserHandlerTests.cs*",
+              "RelativeToolTip": "tests\\Ambev.DeveloperEvaluation.Unit\\EventHandlers\\AuthenticateUserHandlerTests.cs*",
+              "ViewState": "AgIAAO0AAAAAAAAAAADwv/UAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-05-30T14:08:10.498Z",
+              "WhenOpened": "2025-05-30T16:43:41.862Z",
               "EditorCaption": ""
             }
           ]
