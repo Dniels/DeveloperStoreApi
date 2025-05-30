@@ -44,9 +44,6 @@ O sistema publica os seguintes eventos de domínio:
 - **NSubstitute** - Biblioteca de mocking
 - **Bogus (Faker)** - Geração de dados para testes
 
-### Frontend
-- **Angular** - Framework para interface web
-
 ## 📁 Estrutura do Projeto
 
 ```
@@ -68,8 +65,6 @@ root/
 
 - .NET 8.0 SDK
 - PostgreSQL
-- MongoDB
-- Angular CLI (para o frontend)
 
 ### Configuração
 
