@@ -1,5 +1,6 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Commands;
 using Ambev.DeveloperEvaluation.Application.DTOs;
+using Ambev.DeveloperEvaluation.WebApi.Models;
 using AutoMapper;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale
@@ -14,17 +15,20 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale
         /// </summary>
         public UpdateSaleProfile()
         {
+            CreateMap<UpdateSaleItemRequest, UpdateSaleItemDto>()
+                .ConstructUsing(src => new UpdateSaleItemDto(
+                    src.Product.Id,
+                    src.Product.Name,
+                    src.Product.Description,
+                    src.Product.Category,
+                    src.Quantity,
+                    src.UnitPrice
+                ));
+
             CreateMap<(Guid Id, UpdateSaleRequest Request), UpdateSaleCommand>()
-                .ConstructUsing(src => new UpdateSaleCommand(
+                .ConstructUsing((src, context) => new UpdateSaleCommand(
                     src.Id,
-                    src.Request.Items.Select(i => new UpdateSaleItemDto(
-                        i.Product.Id,
-                        i.Product.Name,
-                        i.Product.Description,
-                        i.Product.Category,
-                        i.Quantity,
-                        i.UnitPrice
-                    )).ToList()
+                    context.Mapper.Map<List<UpdateSaleItemDto>>(src.Request.Items)
                 ));
 
             CreateMap<SaleDto, UpdateSaleResponse>()
@@ -42,7 +46,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale
                 }))
                 .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items.Select(i => new SaleItemResponse
                 {
-                    Product = new ProductResponse
+                    Product = new Models.ProductResponse
                     {
                         Id = i.Product.Id,
                         Name = i.Product.Name,

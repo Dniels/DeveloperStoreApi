@@ -4,7 +4,7 @@ using Ambev.DeveloperEvaluation.Application.Exceptions;
 using Ambev.DeveloperEvaluation.Application.Queries;
 using Ambev.DeveloperEvaluation.Common.Validation;
 using Ambev.DeveloperEvaluation.WebApi.Common;
-using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CanceSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
@@ -189,6 +189,8 @@ public class SalesController : BaseController
         }
         catch (ArgumentException ex)
         {
+            _logger.LogError(ex, "Erro interno ao criar venda: {Mensagem}", ex.Message);
+
             return BadRequest(new ApiResponse
             {
                 Success = false,
@@ -205,6 +207,8 @@ public class SalesController : BaseController
         }
         catch (Application.Exceptions.ApplicationException ex)
         {
+            _logger.LogError(ex, "Business rule violation while creating sale: {Mensagem}", ex.Message);
+
             return BadRequest(new ApiResponse
             {
                 Success = false,
@@ -221,13 +225,23 @@ public class SalesController : BaseController
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error creating sale");
+            _logger.LogError(ex, "Erro inesperado em CreateSale");
+
             return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
             {
                 Success = false,
-                Message = "An error occurred while processing your request"
+                Message = "Erro interno: " + ex.Message,
+                Errors = new List<ValidationErrorDetail>
+        {
+            new ValidationErrorDetail
+            {
+                Detail = "Exception",
+                Error = ex.ToString()
+            }
+        }
             });
         }
+
     }
 
     /// <summary>
@@ -398,53 +412,61 @@ public class SalesController : BaseController
     }
 
     /// <summary>
-    /// Cancel a specific item in a sale
-    /// </summary>
-    /// <param name="saleId">The unique identifier of the sale</param>
-    /// <param name="productId">The unique identifier of the product to cancel</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>Success response if the sale item was cancelled</returns>
-    [HttpDelete("{saleId:guid}/items/{productId:guid}")]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CancelSaleItem(Guid saleId, Guid productId, CancellationToken cancellationToken = default)
+/// Cancel a specific item in a sale
+/// </summary>
+/// <param name="saleId">The unique identifier of the sale</param>
+/// <param name="productId">The unique identifier of the product to cancel</param>
+/// <param name="cancellationToken">Cancellation token</param>
+/// <returns>Success response if the sale item was cancelled</returns>
+[HttpDelete("{saleId:guid}/items/{productId:guid}")]
+[ProducesResponseType(typeof(ApiResponseWithData<ApiResponse>), StatusCodes.Status200OK)]
+[ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+[ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+public async Task<IActionResult> CancelSaleItem(Guid saleId, Guid productId, CancellationToken cancellationToken = default)
+{
+    try
     {
-        try
-        {
-            var command = new CancelSaleItemCommand(saleId, productId);
-            await _mediator.Send(command, cancellationToken);
+        var command = new CancelSaleItemCommand(saleId, productId);
+        await _mediator.Send(command, cancellationToken);
 
-            return Ok(new ApiResponse
-            {
-                Success = true,
-                Message = "Sale item cancelled successfully"
-            });
-        }
-        catch (NotFoundException ex)
+        var apiResponse = new ApiResponse
         {
-            return NotFound(new ApiResponse
-            {
-                Success = false,
-                Message = "Sale or item not found",
-                Errors = new List<ValidationErrorDetail>
-                {
-                    new ValidationErrorDetail
-                    {
-                        Detail = "SaleId/ProductId",
-                        Error = ex.Message
-                    }
-                }
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error cancelling sale item. SaleId: {SaleId}, ProductId: {ProductId}", saleId, productId);
-            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
-            {
-                Success = false,
-                Message = "An error occurred while processing your request"
-            });
-        }
+            Success = true,
+            Message = "Sale item cancelled successfully"
+        };
+
+        // DEBUG: Logs para verificar o que está sendo enviado
+        _logger.LogInformation($"DEBUG - Response Success: {apiResponse.Success}");
+        _logger.LogInformation($"DEBUG - Response Message: '{apiResponse.Message}'");
+        _logger.LogInformation($"DEBUG - Response Message Length: {apiResponse.Message.Length}");
+
+        // CORREÇÃO: Usar o método Ok<T> customizado do BaseController
+        return Ok(apiResponse);
     }
+    catch (NotFoundException ex)
+    {
+        return NotFound(new ApiResponse
+        {
+            Success = false,
+            Message = "Sale or item not found",
+            Errors = new List<ValidationErrorDetail>
+            {
+                new ValidationErrorDetail
+                {
+                    Detail = "SaleId/ProductId",
+                    Error = ex.Message
+                }
+            }
+        });
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error cancelling sale item. SaleId: {SaleId}, ProductId: {ProductId}", saleId, productId);
+        return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+        {
+            Success = false,
+            Message = "An error occurred while processing your request"
+        });
+    }
+}
 }

@@ -70,18 +70,28 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
             }
         }
 
-        public void CancelItem(Guid productId)
+        public bool CancelItem(Guid productId)
         {
             ValidateNotCancelled();
 
             var item = _items.FirstOrDefault(x => x.Id == productId);
-            if (item != null)
+            if (item == null)
             {
-                item.Cancel();
-                CalculateTotalAmount();
-                AddDomainEvent(new ItemCancelledEvent(Id, SaleNumber, productId));
+                item = _items.FirstOrDefault(x => x.Product.Id == productId);
+                if (item == null)
+                {
+                    return false;
+                }
             }
+            if (item.IsCancelled)
+                return true;
+
+            item.Cancel();
+            CalculateTotalAmount();
+            AddDomainEvent(new ItemCancelledEvent(Id, SaleNumber, productId));
+            return true;
         }
+
 
         public void Cancel()
         {

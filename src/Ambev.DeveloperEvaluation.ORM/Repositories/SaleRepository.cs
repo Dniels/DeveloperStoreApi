@@ -16,21 +16,30 @@ namespace Ambev.DeveloperEvaluation.ORM.Repositories
         public async Task<Sale?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return await _context.Sales
-                .Include("Items")
+                .Include(s => s.Items)
+                    .ThenInclude(i => i.Product)
+                .Include(s => s.Customer)
+                .Include(s => s.Branch)
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
 
         public async Task<Sale?> GetBySaleNumberAsync(string saleNumber, CancellationToken cancellationToken = default)
         {
             return await _context.Sales
-                .Include("Items")
+                .Include(s => s.Items)
+                    .ThenInclude(i => i.Product)
+                .Include(s => s.Customer)
+                .Include(s => s.Branch)
                 .FirstOrDefaultAsync(x => x.SaleNumber == saleNumber, cancellationToken);
         }
 
         public async Task<IEnumerable<Sale>> GetAllAsync(int page = 1, int size = 10, CancellationToken cancellationToken = default)
         {
             return await _context.Sales
-                .Include("Items")
+                .Include(s => s.Items)
+                    .ThenInclude(i => i.Product)
+                .Include(s => s.Customer)
+                .Include(s => s.Branch)
                 .OrderByDescending(x => x.SaleDate)
                 .Skip((page - 1) * size)
                 .Take(size)
@@ -45,7 +54,6 @@ namespace Ambev.DeveloperEvaluation.ORM.Repositories
 
         public async Task UpdateAsync(Sale sale, CancellationToken cancellationToken = default)
         {
-            _context.Sales.Update(sale);
             await _context.SaveChangesAsync(cancellationToken);
         }
 

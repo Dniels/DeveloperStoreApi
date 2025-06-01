@@ -1,5 +1,6 @@
 ﻿using Ambev.DeveloperEvaluation.Application.Commands;
 using Ambev.DeveloperEvaluation.Application.DTOs;
+using Ambev.DeveloperEvaluation.WebApi.Models;
 using AutoMapper;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale
@@ -15,7 +16,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale
         public CreateSaleProfile()
         {
             CreateMap<CreateSaleRequest, CreateSaleCommand>()
-                .ConstructUsing(src => new CreateSaleCommand(
+                .ConstructUsing((src, context) => new CreateSaleCommand(
                     src.SaleNumber,
                     src.Customer.Id,
                     src.Customer.Name,
@@ -23,14 +24,7 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale
                     src.Branch.Id,
                     src.Branch.Name,
                     src.Branch.Address,
-                    src.Items.Select(i => new CreateSaleItemDto(
-                        i.Product.Id,
-                        i.Product.Name,
-                        i.Product.Description,
-                        i.Product.Category,
-                        i.Quantity,
-                        i.UnitPrice
-                    )).ToList()
+                    context.Mapper.Map<List<CreateSaleItemDto>>(src.Items) 
                 ));
 
             CreateMap<SaleDto, CreateSaleResponse>()
@@ -61,6 +55,17 @@ namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale
                     TotalAmount = i.TotalAmount,
                     IsCancelled = i.IsCancelled
                 }).ToList()));
+
+            CreateMap<SaleItemInfo, CreateSaleItemDto>()
+                .ConstructUsing(src => new CreateSaleItemDto(
+                    src.Product.Id,
+                    src.Product.Name,
+                    src.Product.Description,
+                    src.Product.Category,
+                    src.Quantity,
+                    src.UnitPrice
+                ));
+
         }
     }
 }
