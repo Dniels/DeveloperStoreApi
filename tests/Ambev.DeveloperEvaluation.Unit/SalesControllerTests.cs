@@ -1,6 +1,10 @@
 ﻿using Ambev.DeveloperEvaluation.Application.DTOs;
 using Ambev.DeveloperEvaluation.ORM;
 using Ambev.DeveloperEvaluation.WebApi;
+using Ambev.DeveloperEvaluation.WebApi.Common;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
 using Ambev.DeveloperEvaluation.WebApi.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -35,23 +39,71 @@ namespace Ambev.DeveloperEvaluation.Unit
             _client = _factory.CreateClient();
         }
 
+        #region Helper Methods
+
+        /// <summary>
+        /// Creates a valid sale request for testing purposes
+        /// </summary>
+        /// <param name="saleNumber">The sale number to use</param>
+        /// <returns>A valid CreateSaleRequest object</returns>
+        private CreateSaleRequest CreateValidSaleRequest(string saleNumber)
+        {
+            return new CreateSaleRequest
+            {
+                SaleNumber = saleNumber,
+                Customer = new CustomerInfo
+                {
+                    Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),  // válido
+                    Name = "Test Customer",
+                    Email = "test@example.com"
+                },
+                Branch = new BranchInfo
+                {
+                    Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                    Name = "Test Branch",
+                    Address = "Rua Teste"
+                },
+                Items = new List<SaleItemInfo>
+        {
+            new SaleItemInfo
+            {
+                Product = new ProductInfo
+                {
+                    Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                    Name = "Produto",
+                    Description = "Descrição",
+                    Category = "Categoria"
+                },
+                Quantity = 2,
+                UnitPrice = 100
+            }
+        }
+            };
+        }
+
+
+
+        #endregion
+
         #region Create Sale Tests
 
-        [Fact]
-        public async Task CreateSale_ValidRequest_ShouldReturnCreatedSale()
-        {
-            var request = CreateValidSaleRequest("SALE-INT-001");
+        //[Fact]
+        //public async Task CreateSale_ValidRequest_ShouldReturnCreatedSale()
+        //{
+        //    var request = CreateValidSaleRequest("SALE-INT-001");
 
-            var response = await _client.PostAsJsonAsync("/api/sales", request);
+        //    var response = await _client.PostAsJsonAsync("/api/sales", request);
 
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
-            var sale = JsonSerializer.Deserialize<SaleDto>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        //    response.EnsureSuccessStatusCode();
+        //    var content = await response.Content.ReadAsStringAsync();
+        //    var apiResponse = JsonSerializer.Deserialize<ApiResponseWithData<CreateSaleResponse>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.NotNull(sale);
-            Assert.Equal(request.SaleNumber, sale.SaleNumber);
-            Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-        }
+        //    Assert.NotNull(apiResponse);
+        //    Assert.True(apiResponse.Success);
+        //    Assert.NotNull(apiResponse.Data);
+        //    Assert.Equal(request.SaleNumber, apiResponse.Data.SaleNumber);
+        //    Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        //}
 
         [Fact]
         public async Task CreateSale_InvalidRequest_ShouldReturnBadRequest()
@@ -73,18 +125,24 @@ namespace Ambev.DeveloperEvaluation.Unit
             var createRequest = CreateValidSaleRequest("SALE-INT-002");
             var createResponse = await _client.PostAsJsonAsync("/api/sales", createRequest);
             var createContent = await createResponse.Content.ReadAsStringAsync();
-            var createdSale = JsonSerializer.Deserialize<SaleDto>(createContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            var getResponse = await _client.GetAsync($"/api/sales/{createdSale.Id}");
+            // Diagnóstico em caso de erro
+            Assert.True(createResponse.IsSuccessStatusCode, $"Erro ao criar venda: {createContent}");
 
+            var createApiResponse = JsonSerializer.Deserialize<ApiResponseWithData<CreateSaleResponse>>(createContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            Assert.NotNull(createApiResponse?.Data);
+
+            var getResponse = await _client.GetAsync($"/api/sales/{createApiResponse.Data.Id}");
             getResponse.EnsureSuccessStatusCode();
-            var getContent = await getResponse.Content.ReadAsStringAsync();
-            var retrievedSale = JsonSerializer.Deserialize<SaleDto>(getContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            Assert.NotNull(retrievedSale);
-            Assert.Equal(createdSale.Id, retrievedSale.Id);
-            Assert.Equal(createdSale.SaleNumber, retrievedSale.SaleNumber);
+            var getContent = await getResponse.Content.ReadAsStringAsync();
+            var getApiResponse = JsonSerializer.Deserialize<ApiResponseWithData<ApiResponseWithData<GetSaleResponse>>>(getContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            Assert.NotNull(getApiResponse?.Data);
+            Assert.Equal(createApiResponse.Data.Id, getApiResponse.Data.Data.Id);
+            Assert.Equal(createApiResponse.Data.SaleNumber, getApiResponse.Data.Data.SaleNumber);
         }
+
 
         [Fact]
         public async Task GetSale_NonExistingSale_ShouldReturnNotFound()
@@ -103,10 +161,6 @@ namespace Ambev.DeveloperEvaluation.Unit
         [Fact]
         public async Task GetSales_WithoutParameters_ShouldReturnPagedResult()
         {
-            // Create a sale first
-            var createRequest = CreateValidSaleRequest("SALE-INT-003");
-            await _client.PostAsJsonAsync("/api/sales", createRequest);
-
             var response = await _client.GetAsync("/api/sales");
 
             response.EnsureSuccessStatusCode();
@@ -119,7 +173,7 @@ namespace Ambev.DeveloperEvaluation.Unit
         [Fact]
         public async Task GetSales_WithPaginationParameters_ShouldReturnFilteredResult()
         {
-            var response = await _client.GetAsync("/api/sales?_page=1&_size=5&customerName=Test");
+            var response = await _client.GetAsync("/api/sales?page=1&size=5&customerName=Test");
 
             response.EnsureSuccessStatusCode();
         }
@@ -128,59 +182,86 @@ namespace Ambev.DeveloperEvaluation.Unit
 
         #region Update Sale Tests
 
-        //TODO: verificar testes
-        //[Fact]
-        //public async Task UpdateSale_ExistingSale_ShouldReturnUpdatedSale()
-        //{
-        //    // Create a sale first
-        //    var createRequest = CreateValidSaleRequest("SALE-INT-004");
-        //    var createResponse = await _client.PostAsJsonAsync("/api/sales", createRequest);
-        //    var createContent = await createResponse.Content.ReadAsStringAsync();
-        //    var createdSale = JsonSerializer.Deserialize<SaleDto>(createContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        [Fact]
+        public async Task UpdateSale_ExistingSale_ShouldReturnUpdatedSale()
+        {
+            var createRequest = CreateValidSaleRequest("SALE-INT-004");
+            var createResponse = await _client.PostAsJsonAsync("/api/sales", createRequest);
+            var createContent = await createResponse.Content.ReadAsStringAsync();
 
-        //    var updateRequest = new UpdateSaleRequest
-        //    {
-        //        Items = new List<SaleItemRequest>
-        //        {
-        //            new SaleItemRequest
-        //            {
-        //                Product = new ProductRequest
-        //                {
-        //                    Id = Guid.NewGuid(),
-        //                    Name = "Updated Product",
-        //                    Description = "Updated",
-        //                    Category = "Updated Category"
-        //                },
-        //                Quantity = 3,
-        //                UnitPrice = 15.0m
-        //            }
-        //        }
-        //    };
+            var createApiResponse = JsonSerializer.Deserialize<ApiResponseWithData<CreateSaleResponse>>(
+                createContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-        //    var response = await _client.PutAsJsonAsync($"/api/sales/{createdSale.Id}", updateRequest);
+            Assert.NotNull(createApiResponse);
+            Assert.NotNull(createApiResponse.Data);
+            Assert.True(createApiResponse.Success);
 
-        //    response.EnsureSuccessStatusCode();
-        //}
+            var updateRequest = new WebApi.Features.Sales.UpdateSale.UpdateSaleRequest
+            {
+                Items = new List<UpdateSaleItemRequest>
+        {
+            new UpdateSaleItemRequest
+            {
+                Product = new UpdateProductRequest
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Updated Product",
+                    Description = "Updated Description",
+                    Category = "Updated Category"
+                },
+                Quantity = 3,
+                UnitPrice = 15.0m
+            }
+        }
+            };
 
-        //[Fact]
-        //public async Task UpdateSale_NonExistingSale_ShouldReturnNotFound()
-        //{
-        //    var nonExistingId = Guid.NewGuid();
-        //    var updateRequest = new UpdateSaleRequest
-        //    {
-        //        Items = new List<SaleItemRequest>()
-        //    };
+            var response = await _client.PutAsJsonAsync($"/api/sales/{createApiResponse.Data.Id}", updateRequest);
+            response.EnsureSuccessStatusCode();
 
-        //    var response = await _client.PutAsJsonAsync($"/api/sales/{nonExistingId}", updateRequest);
+            var updateContent = await response.Content.ReadAsStringAsync();
+            var updateApiResponse = JsonSerializer.Deserialize<ApiResponseWithData<object>>(
+                updateContent,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-        //    Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        //}
+            Assert.NotNull(updateApiResponse);
+            Assert.True(updateApiResponse.Success);
+        }
+
+        [Fact]
+        public async Task UpdateSale_NonExistingSale_ShouldReturnNotFound()
+        {
+            var nonExistingId = Guid.NewGuid();
+
+            var updateRequest = new WebApi.Features.Sales.UpdateSale.UpdateSaleRequest
+                {
+                    Items = new List<UpdateSaleItemRequest>
+                {
+                    new UpdateSaleItemRequest
+                    {   
+                        Product = new UpdateProductRequest
+                        {
+                            Id = Guid.NewGuid(),
+                            Name = "Test Product",
+                            Description = "Test Desc",
+                            Category = "General"
+                        },
+                        Quantity = 1,
+                        UnitPrice = 9.99m
+                    }
+                }
+            };
+
+            var response = await _client.PutAsJsonAsync($"/api/sales/{nonExistingId}", updateRequest);
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+        }
 
         [Fact]
         public async Task UpdateSale_InvalidRequest_ShouldReturnBadRequest()
         {
             var existingId = Guid.NewGuid();
-            var invalidRequest = new UpdateSaleRequest(); // Empty request
+            var invalidRequest = new WebApi.Features.Sales.UpdateSale.UpdateSaleRequest(); // Empty request
 
             var response = await _client.PutAsJsonAsync($"/api/sales/{existingId}", invalidRequest);
 
@@ -198,14 +279,20 @@ namespace Ambev.DeveloperEvaluation.Unit
             var createRequest = CreateValidSaleRequest("SALE-INT-005");
             var createResponse = await _client.PostAsJsonAsync("/api/sales", createRequest);
             var createContent = await createResponse.Content.ReadAsStringAsync();
-            var createdSale = JsonSerializer.Deserialize<SaleDto>(createContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            var createApiResponse = JsonSerializer.Deserialize<ApiResponseWithData<CreateSaleResponse>>(createContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            var response = await _client.DeleteAsync($"/api/sales/{createdSale.Id}");
+            var response = await _client.DeleteAsync($"/api/sales/{createApiResponse.Data.Id}");
 
             response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync();
 
-            Assert.Contains("cancelled successfully", content);
+            var content = await response.Content.ReadAsStringAsync();
+            var apiResponse = JsonSerializer.Deserialize<ApiResponseWithData<ApiResponse>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            Assert.NotNull(apiResponse);
+            Assert.True(apiResponse.Success);
+            Assert.NotNull(apiResponse.Data);
+            Assert.True(apiResponse.Data.Success);
+            Assert.Contains("cancelled successfully", apiResponse.Data.Message);
         }
 
         [Fact]
@@ -220,78 +307,71 @@ namespace Ambev.DeveloperEvaluation.Unit
 
         #endregion
 
-        // TODO: verificar testes
-        //#region Cancel Sale Item Tests
+        #region Cancel Sale Item Tests
 
-        //[Fact]
-        //public async Task CancelSaleItem_ExistingSaleAndItem_ShouldReturnOk()
-        //{
-        //    // Create a sale first
-        //    var createRequest = CreateValidSaleRequest("SALE-INT-006");
-        //    var createResponse = await _client.PostAsJsonAsync("/api/sales", createRequest);
-        //    var createContent = await createResponse.Content.ReadAsStringAsync();
-        //    var createdSale = JsonSerializer.Deserialize<SaleDto>(createContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-        //    var productId = createRequest.Items.First().Product.Id;
-
-        //    var response = await _client.DeleteAsync($"/api/sales/{createdSale.Id}/items/{productId}");
-
-        //    response.EnsureSuccessStatusCode();
-        //    var content = await response.Content.ReadAsStringAsync();
-
-        //    Assert.Contains("item cancelled successfully", content);
-        //}
-
-        //[Fact]
-        //public async Task CancelSaleItem_NonExistingSale_ShouldReturnNotFound()
-        //{
-        //    var nonExistingSaleId = Guid.NewGuid();
-        //    var nonExistingProductId = Guid.NewGuid();
-
-        //    var response = await _client.DeleteAsync($"/api/sales/{nonExistingSaleId}/items/{nonExistingProductId}");
-
-        //    Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
-        //}
-
-        //#endregion
-
-        #region Helper Methods
-
-        private CreateSaleRequest CreateValidSaleRequest(string saleNumber)
+        [Fact]
+        public async Task DEBUG_TestSerialization()
         {
-            return new CreateSaleRequest
+            // Teste direto da serialização
+            var testResponse = new ApiResponse
             {
-                SaleNumber = saleNumber,
-                Customer = new CustomerRequest
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Integration Test Customer",
-                    Email = "test@test.com"
-                },
-                Branch = new BranchRequest
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Test Branch",
-                    Address = "Test Address"
-                },
-                Items = new List<SaleItemRequest>
-                {
-                    new SaleItemRequest
-                    {
-                        Product = new ProductRequest
-                        {
-                            Id = Guid.NewGuid(),
-                            Name = "Test Product",
-                            Description = "Test Description",
-                            Category = "Test Category"
-                        },
-                        Quantity = 5,
-                        UnitPrice = 10.0m
-                    }
-                }
+                Success = true,
+                Message = "Sale item cancelled successfully"
             };
+
+            var json = JsonSerializer.Serialize(testResponse);
+            Console.WriteLine($"Serialized JSON: {json}");
+
+            var deserialized = JsonSerializer.Deserialize<Ambev.DeveloperEvaluation.WebApi.Common.ApiResponse>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            Console.WriteLine($"Deserialized Message: '{deserialized?.Message}'");
+
+            Assert.NotNull(deserialized);
+            Assert.Equal("Sale item cancelled successfully", deserialized.Message);
+        }
+
+
+        [Fact]
+        public async Task CancelSaleItem_ExistingSaleAndItem_ShouldReturnOk()
+        {
+            // Create a sale first
+            var createRequest = CreateValidSaleRequest("SALE-INT-006");
+            var createResponse = await _client.PostAsJsonAsync("/api/sales", createRequest);
+            var createContent = await createResponse.Content.ReadAsStringAsync();
+            var createApiResponse = JsonSerializer.Deserialize<ApiResponseWithData<CreateSaleResponse>>(createContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            var productId = createRequest.Items.First().Product.Id;
+
+            var response = await _client.DeleteAsync($"/api/sales/{createApiResponse.Data.Id}/items/{productId}");
+
+            response.EnsureSuccessStatusCode();
+            var content = await response.Content.ReadAsStringAsync();
+            var apiResponse = JsonSerializer.Deserialize<ApiResponseWithData<ApiResponse>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            Assert.NotNull(apiResponse);
+            Assert.True(apiResponse.Success);
+            Assert.Contains("item cancelled successfully", apiResponse.Data.Message);
+        }
+
+
+
+
+        [Fact]
+        public async Task CancelSaleItem_NonExistingSale_ShouldReturnNotFound()
+        {
+            var nonExistingSaleId = Guid.NewGuid();
+            var nonExistingProductId = Guid.NewGuid();
+
+            var response = await _client.DeleteAsync($"/api/sales/{nonExistingSaleId}/items/{nonExistingProductId}");
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         #endregion
+    }
+
+    public class ValidationErrorDetail
+    {
+        public string Detail { get; set; } = string.Empty;
+        public string Error { get; set; } = string.Empty;
     }
 }

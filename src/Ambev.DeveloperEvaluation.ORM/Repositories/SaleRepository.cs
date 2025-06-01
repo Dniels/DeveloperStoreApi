@@ -16,21 +16,30 @@ namespace Ambev.DeveloperEvaluation.ORM.Repositories
         public async Task<Sale?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
         {
             return await _context.Sales
-                .Include("Items")
+                .Include(s => s.Items)
+                    .ThenInclude(i => i.Product)
+                .Include(s => s.Customer)
+                .Include(s => s.Branch)
                 .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
 
         public async Task<Sale?> GetBySaleNumberAsync(string saleNumber, CancellationToken cancellationToken = default)
         {
             return await _context.Sales
-                .Include("Items")
+                .Include(s => s.Items)
+                    .ThenInclude(i => i.Product)
+                .Include(s => s.Customer)
+                .Include(s => s.Branch)
                 .FirstOrDefaultAsync(x => x.SaleNumber == saleNumber, cancellationToken);
         }
 
         public async Task<IEnumerable<Sale>> GetAllAsync(int page = 1, int size = 10, CancellationToken cancellationToken = default)
         {
             return await _context.Sales
-                .Include("Items")
+                .Include(s => s.Items)
+                    .ThenInclude(i => i.Product)
+                .Include(s => s.Customer)
+                .Include(s => s.Branch)
                 .OrderByDescending(x => x.SaleDate)
                 .Skip((page - 1) * size)
                 .Take(size)
@@ -43,9 +52,40 @@ namespace Ambev.DeveloperEvaluation.ORM.Repositories
             await _context.SaveChangesAsync(cancellationToken);
         }
 
+        public async Task CancelAsync(Sale sale, CancellationToken cancellationToken = default)
+        {
+            var existingSale = await _context.Sales
+                .Include(s => s.Items)
+                    .ThenInclude(i => i.Product)
+                .FirstOrDefaultAsync(s => s.Id == sale.Id, cancellationToken);
+
+            if (existingSale == null)
+                throw new KeyNotFoundException($"Sale with ID {sale.Id} not found");
+
+            existingSale.Cancel();
+
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+
         public async Task UpdateAsync(Sale sale, CancellationToken cancellationToken = default)
         {
-            _context.Sales.Update(sale);
+            var existingSale = await _context.Sales
+                .Include(s => s.Items)
+                    .ThenInclude(i => i.Product)
+                .FirstOrDefaultAsync(s => s.Id == sale.Id, cancellationToken);
+
+            if (existingSale == null)
+                throw new KeyNotFoundException($"Sale with ID {sale.Id} not found");
+
+            if (existingSale.IsCancelled)
+                throw new DomainException("Cannot update a cancelled sale");
+
+            existingSale.UpdateSaleNumber(sale.SaleNumber);
+
+            var items = sale.Items.Select(i => (i.Product, i.Quantity, i.UnitPrice));
+            existingSale.UpdateItems(items);
+
             await _context.SaveChangesAsync(cancellationToken);
         }
 

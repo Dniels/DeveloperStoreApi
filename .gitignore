@@ -361,3 +361,15 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/src/Ambev.DeveloperEvaluation.WebApi/obj/Debug/net8.0/Ambev.DeveloperEvaluation.WebApi.csproj.FileListAbsolute.txt
+/src/Ambev.DeveloperEvaluation.WebApi/obj/Debug/net8.0/apphost.exe
+/tests/Ambev.DeveloperEvaluation.Functional/obj/Debug/net8.0/Ambev.DeveloperEvaluation.Functional.assets.cache
+/tests/Ambev.DeveloperEvaluation.Integration/obj/Debug/net8.0/Ambev.DeveloperEvaluation.Integration.csproj.FileListAbsolute.txt
+/.vs/Ambev.DeveloperEvaluation/DesignTimeBuild/.dtbcache.v2
+/.vs/Ambev.DeveloperEvaluation/v17/TestStore/0/testlog.manifest
+/.vs/Ambev.DeveloperEvaluation/v17/.suo
+/.vs/Ambev.DeveloperEvaluation/v17/DocumentLayout.json
+/tests/Ambev.DeveloperEvaluation.Functional/obj/Debug/net8.0/Ambev.DeveloperEvaluation.Functional.csproj.FileListAbsolute.txt
+/tests/Ambev.DeveloperEvaluation.Unit/obj/Debug/net8.0/Ambev.DeveloperEvaluation.Unit.assets.cache
+/tests/Ambev.DeveloperEvaluation.Unit/obj/Debug/net8.0/Ambev.DeveloperEvaluation.Unit.csproj.FileListAbsolute.txt
+/tests/Ambev.DeveloperEvaluation.Integration/obj/Debug/net8.0/Ambev.DeveloperEvaluation.Integration.assets.cache

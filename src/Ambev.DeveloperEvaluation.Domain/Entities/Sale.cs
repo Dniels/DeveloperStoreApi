@@ -70,18 +70,28 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
             }
         }
 
-        public void CancelItem(Guid productId)
+        public bool CancelItem(Guid productId)
         {
             ValidateNotCancelled();
 
             var item = _items.FirstOrDefault(x => x.Id == productId);
-            if (item != null)
+            if (item == null)
             {
-                item.Cancel();
-                CalculateTotalAmount();
-                AddDomainEvent(new ItemCancelledEvent(Id, SaleNumber, productId));
+                item = _items.FirstOrDefault(x => x.Product.Id == productId);
+                if (item == null)
+                {
+                    return false;
+                }
             }
+            if (item.IsCancelled)
+                return true;
+
+            item.Cancel();
+            CalculateTotalAmount();
+            AddDomainEvent(new ItemCancelledEvent(Id, SaleNumber, productId));
+            return true;
         }
+
 
         public void Cancel()
         {
@@ -115,6 +125,31 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
         {
             if (IsCancelled)
                 throw new DomainException("Cannot modify a cancelled sale");
+        }
+
+        public void UpdateSaleNumber(string saleNumber)
+        {
+            ValidateNotCancelled();
+            SaleNumber = saleNumber ?? throw new ArgumentNullException(nameof(saleNumber));
+            AddDomainEvent(new SaleModifiedEvent(Id, SaleNumber));
+        }
+
+        public void UpdateItems(IEnumerable<(Product product, int quantity, decimal unitPrice)> items)
+        {
+            ValidateNotCancelled();
+
+            _items.Clear();
+
+            foreach (var (product, quantity, unitPrice) in items)
+            {
+                AddItem(product, quantity, unitPrice);
+            }
+        }
+
+        public void UpdateSale(string saleNumber, IEnumerable<(Product product, int quantity, decimal unitPrice)> items)
+        {
+            UpdateSaleNumber(saleNumber);
+            UpdateItems(items);
         }
     }
 }

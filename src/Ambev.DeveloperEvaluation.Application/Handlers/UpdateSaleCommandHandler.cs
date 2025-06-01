@@ -31,20 +31,30 @@ namespace Ambev.DeveloperEvaluation.Application.Handlers
             if (sale == null)
                 throw new NotFoundException($"Sale with ID {request.Id} not found");
 
-            // Remove all existing items and add new ones
-            var existingProducts = sale.Items.Select(x => x.Product.Id).ToList();
-            foreach (var productId in existingProducts)
+            var newProductIds = request.Items.Select(i => i.ProductId).ToHashSet();
+            var itemsToRemove = sale.Items.Where(item => !newProductIds.Contains(item.Product.Id)).ToList();
+
+            foreach (var item in itemsToRemove)
             {
-                sale.RemoveItem(productId);
+                sale.RemoveItem(item.Product.Id);
             }
 
-            foreach (var item in request.Items)
+            foreach (var requestItem in request.Items)
             {
-                var product = new Product(item.ProductId, item.ProductName, item.ProductDescription, item.ProductCategory);
-                sale.AddItem(product, item.Quantity, item.UnitPrice);
+                var existingItem = sale.Items.FirstOrDefault(item => item.Product.Id == requestItem.ProductId);
+                
+                if (existingItem != null)
+                {
+                    sale.RemoveItem(existingItem.Product.Id);
+                }
+
+                var product = new Product(requestItem.ProductId, requestItem.ProductName,
+                                        requestItem.ProductDescription, requestItem.ProductCategory);
+                sale.AddItem(product, requestItem.Quantity, requestItem.UnitPrice);
             }
 
             await _saleRepository.UpdateAsync(sale, cancellationToken);
+
             await _eventDispatcher.DispatchEventsAsync(sale, cancellationToken);
 
             return _mapper.Map<SaleDto>(sale);
