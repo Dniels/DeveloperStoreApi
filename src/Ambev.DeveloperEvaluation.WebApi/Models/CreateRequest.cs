@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Models
 {
-    public class CreateSaleRequest
+    public class CreateRequest
     {
         [Required]
         public string SaleNumber { get; set; } = string.Empty;
