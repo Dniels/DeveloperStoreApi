@@ -8,6 +8,7 @@ using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSale;
 using Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
+using Ambev.DeveloperEvaluation.Application.Exceptions;
 using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;

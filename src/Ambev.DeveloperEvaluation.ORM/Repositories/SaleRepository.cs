@@ -52,8 +52,40 @@ namespace Ambev.DeveloperEvaluation.ORM.Repositories
             await _context.SaveChangesAsync(cancellationToken);
         }
 
+        public async Task CancelAsync(Sale sale, CancellationToken cancellationToken = default)
+        {
+            var existingSale = await _context.Sales
+                .Include(s => s.Items)
+                    .ThenInclude(i => i.Product)
+                .FirstOrDefaultAsync(s => s.Id == sale.Id, cancellationToken);
+
+            if (existingSale == null)
+                throw new KeyNotFoundException($"Sale with ID {sale.Id} not found");
+
+            existingSale.Cancel();
+
+            await _context.SaveChangesAsync(cancellationToken);
+        }
+
+
         public async Task UpdateAsync(Sale sale, CancellationToken cancellationToken = default)
         {
+            var existingSale = await _context.Sales
+                .Include(s => s.Items)
+                    .ThenInclude(i => i.Product)
+                .FirstOrDefaultAsync(s => s.Id == sale.Id, cancellationToken);
+
+            if (existingSale == null)
+                throw new KeyNotFoundException($"Sale with ID {sale.Id} not found");
+
+            if (existingSale.IsCancelled)
+                throw new DomainException("Cannot update a cancelled sale");
+
+            existingSale.UpdateSaleNumber(sale.SaleNumber);
+
+            var items = sale.Items.Select(i => (i.Product, i.Quantity, i.UnitPrice));
+            existingSale.UpdateItems(items);
+
             await _context.SaveChangesAsync(cancellationToken);
         }
 

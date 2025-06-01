@@ -126,5 +126,30 @@ namespace Ambev.DeveloperEvaluation.Domain.Entities
             if (IsCancelled)
                 throw new DomainException("Cannot modify a cancelled sale");
         }
+
+        public void UpdateSaleNumber(string saleNumber)
+        {
+            ValidateNotCancelled();
+            SaleNumber = saleNumber ?? throw new ArgumentNullException(nameof(saleNumber));
+            AddDomainEvent(new SaleModifiedEvent(Id, SaleNumber));
+        }
+
+        public void UpdateItems(IEnumerable<(Product product, int quantity, decimal unitPrice)> items)
+        {
+            ValidateNotCancelled();
+
+            _items.Clear();
+
+            foreach (var (product, quantity, unitPrice) in items)
+            {
+                AddItem(product, quantity, unitPrice);
+            }
+        }
+
+        public void UpdateSale(string saleNumber, IEnumerable<(Product product, int quantity, decimal unitPrice)> items)
+        {
+            UpdateSaleNumber(saleNumber);
+            UpdateItems(items);
+        }
     }
 }

@@ -232,9 +232,24 @@ namespace Ambev.DeveloperEvaluation.Unit
         public async Task UpdateSale_NonExistingSale_ShouldReturnNotFound()
         {
             var nonExistingId = Guid.NewGuid();
+
             var updateRequest = new WebApi.Features.Sales.UpdateSale.UpdateSaleRequest
-            {
-                Items = new List<UpdateSaleItemRequest>()
+                {
+                    Items = new List<UpdateSaleItemRequest>
+                {
+                    new UpdateSaleItemRequest
+                    {   
+                        Product = new UpdateProductRequest
+                        {
+                            Id = Guid.NewGuid(),
+                            Name = "Test Product",
+                            Description = "Test Desc",
+                            Category = "General"
+                        },
+                        Quantity = 1,
+                        UnitPrice = 9.99m
+                    }
+                }
             };
 
             var response = await _client.PutAsJsonAsync($"/api/sales/{nonExistingId}", updateRequest);
