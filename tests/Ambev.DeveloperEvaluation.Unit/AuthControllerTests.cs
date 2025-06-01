@@ -74,7 +74,7 @@ namespace Ambev.DeveloperEvaluation.Unit
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var apiResponse = Assert.IsType<ApiResponseWithData<ApiResponseWithData<AuthenticateUserResponse>>>(okResult.Value);
+            var apiResponse = Assert.IsType<WebApi.Common.ApiResponseWithData<WebApi.Common.ApiResponseWithData<AuthenticateUserResponse>>>(okResult.Value);
 
             Assert.True(apiResponse.Success);
             Assert.Equal("User authenticated successfully", apiResponse.Data.Message);
@@ -277,7 +277,7 @@ namespace Ambev.DeveloperEvaluation.Unit
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var apiResponse = Assert.IsType<ApiResponseWithData<ApiResponseWithData<AuthenticateUserResponse>>>(okResult.Value);
+            var apiResponse = Assert.IsType<WebApi.Common.ApiResponseWithData<WebApi.Common.ApiResponseWithData<AuthenticateUserResponse>>>(okResult.Value);
 
             Assert.True(apiResponse.Success);
             Assert.Equal("User authenticated successfully", apiResponse.Data.Message);

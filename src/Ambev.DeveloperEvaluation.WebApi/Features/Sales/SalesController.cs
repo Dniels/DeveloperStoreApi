@@ -2,213 +2,466 @@
 using Ambev.DeveloperEvaluation.Application.DTOs;
 using Ambev.DeveloperEvaluation.Application.Exceptions;
 using Ambev.DeveloperEvaluation.Application.Queries;
-using Ambev.DeveloperEvaluation.WebApi.Models;
+using Ambev.DeveloperEvaluation.Common.Validation;
+using Ambev.DeveloperEvaluation.WebApi.Common;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.CreateSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.GetSale;
+using Ambev.DeveloperEvaluation.WebApi.Features.Sales.UpdateSale;
+using Ambev.DeveloperEvaluation.Application.Exceptions;
+using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales
+namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales;
+
+/// <summary>
+/// Controller for managing sale operations
+/// </summary>
+[ApiController]
+[Route("api/[controller]")]
+public class SalesController : BaseController
 {
+    private readonly IMediator _mediator;
+    private readonly IMapper _mapper;
+    private readonly ILogger<SalesController> _logger;
 
-    [ApiController]
-    [Route("api/[controller]")]
-    public class SalesController : ControllerBase
+    /// <summary>
+    /// Initializes a new instance of SalesController
+    /// </summary>
+    /// <param name="mediator">The mediator instance</param>
+    /// <param name="mapper">The AutoMapper instance</param>
+    /// <param name="logger">The logger instance</param>
+    public SalesController(IMediator mediator, IMapper mapper, ILogger<SalesController> logger)
     {
-        private readonly IMediator _mediator;
-        private readonly ILogger<SalesController> _logger;
+        _mediator = mediator;
+        _mapper = mapper;
+        _logger = logger;
+    }
 
-        public SalesController(IMediator mediator, ILogger<SalesController> logger)
+    /// <summary>
+    /// Get all sales with pagination and filtering
+    /// </summary>
+    /// <param name="page">Page number (default: 1)</param>
+    /// <param name="size">Page size (default: 10)</param>
+    /// <param name="order">Sort order</param>
+    /// <param name="customerName">Filter by customer name</param>
+    /// <param name="branchName">Filter by branch name</param>
+    /// <param name="minDate">Filter by minimum date</param>
+    /// <param name="maxDate">Filter by maximum date</param>
+    /// <param name="isCancelled">Filter by cancellation status</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Paginated list of sales</returns>
+    [HttpGet]
+    [ProducesResponseType(typeof(ApiResponseWithData<PagedResult<SaleDto>>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetSales(
+        [FromQuery] int page = 1,
+        [FromQuery] int size = 10,
+        [FromQuery] string? order = null,
+        [FromQuery] string? customerName = null,
+        [FromQuery] string? branchName = null,
+        [FromQuery] DateTime? minDate = null,
+        [FromQuery] DateTime? maxDate = null,
+        [FromQuery] bool? isCancelled = null,
+        CancellationToken cancellationToken = default)
+    {
+        try
         {
-            _mediator = mediator;
-            _logger = logger;
+            var query = new GetSalesQuery(page, size, order, customerName, branchName, minDate, maxDate, isCancelled);
+            var result = await _mediator.Send(query, cancellationToken);
+
+            return Ok(new ApiResponseWithData<PagedResult<SaleDto>>
+            {
+                Success = true,
+                Message = "Sales retrieved successfully",
+                Data = result
+            });
         }
-
-        /// <summary>
-        /// Get all sales with pagination and filtering
-        /// </summary>
-        [HttpGet]
-        public async Task<ActionResult<PagedResult<SaleDto>>> GetSales(
-            [FromQuery] int _page = 1,
-            [FromQuery] int _size = 10,
-            [FromQuery] string? _order = null,
-            [FromQuery] string? customerName = null,
-            [FromQuery] string? branchName = null,
-            [FromQuery] DateTime? _minDate = null,
-            [FromQuery] DateTime? _maxDate = null,
-            [FromQuery] bool? isCancelled = null,
-            CancellationToken cancellationToken = default)
+        catch (Exception ex)
         {
-            try
+            _logger.LogError(ex, "Error getting sales");
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
             {
-                var query = new GetSalesQuery(_page, _size, _order, customerName, branchName, _minDate, _maxDate, isCancelled);
-                var result = await _mediator.Send(query, cancellationToken);
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting sales");
-                return StatusCode(500, new ErrorResponse("InternalServerError", "An error occurred while processing your request", ex.Message));
-            }
-        }
-
-        /// <summary>
-        /// Get a sale by ID
-        /// </summary>
-        [HttpGet("{id:guid}")]
-        public async Task<ActionResult<SaleDto>> GetSale(Guid id, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var query = new GetSaleByIdQuery(id);
-                var result = await _mediator.Send(query, cancellationToken);
-
-                if (result == null)
-                    return NotFound(new ErrorResponse("ResourceNotFound", "Sale not found", $"The sale with ID {id} does not exist"));
-
-                return Ok(result);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error getting sale {SaleId}", id);
-                return StatusCode(500, new ErrorResponse("InternalServerError", "An error occurred while processing your request", ex.Message));
-            }
-        }
-
-        /// <summary>
-        /// Create a new sale
-        /// </summary>
-        [HttpPost]
-        public async Task<ActionResult<SaleDto>> CreateSale([FromBody] CreateSaleRequest request, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
-                var command = new CreateSaleCommand(
-                    request.SaleNumber,
-                    request.Customer.Id,
-                    request.Customer.Name,
-                    request.Customer.Email,
-                    request.Branch.Id,
-                    request.Branch.Name,
-                    request.Branch.Address,
-                    request.Items.Select(i => new CreateSaleItemDto(
-                        i.Product.Id,
-                        i.Product.Name,
-                        i.Product.Description,
-                        i.Product.Category,
-                        i.Quantity,
-                        i.UnitPrice
-                    )).ToList()
-                );
-
-                var result = await _mediator.Send(command, cancellationToken);
-                return CreatedAtAction(nameof(GetSale), new { id = result.Id }, result);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new ErrorResponse("ValidationError", "Invalid input data", ex.Message));
-            }
-            catch (Application.Exceptions.ApplicationException ex)
-            {
-                return BadRequest(new ErrorResponse("BusinessRuleViolation", "Business rule violation", ex.Message));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating sale");
-                return StatusCode(500, new ErrorResponse("InternalServerError", "An error occurred while processing your request", ex.Message));
-            }
-        }
-
-        /// <summary>
-        /// Update an existing sale
-        /// </summary>
-        [HttpPut("{id:guid}")]
-        public async Task<ActionResult<SaleDto>> UpdateSale(Guid id, [FromBody] UpdateSaleRequest request, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                if (!ModelState.IsValid)
-                    return BadRequest(ModelState);
-
-                var command = new UpdateSaleCommand(
-                    id,
-                    request.Items.Select(i => new UpdateSaleItemDto(
-                        i.Product.Id,
-                        i.Product.Name,
-                        i.Product.Description,
-                        i.Product.Category,
-                        i.Quantity,
-                        i.UnitPrice
-                    )).ToList()
-                );
-
-                var result = await _mediator.Send(command, cancellationToken);
-                return Ok(result);
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(new ErrorResponse("ResourceNotFound", "Sale not found", ex.Message));
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new ErrorResponse("ValidationError", "Invalid input data", ex.Message));
-            }
-            catch (DomainException ex)
-            {
-                return BadRequest(new ErrorResponse("BusinessRuleViolation", "Business rule violation", ex.Message));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating sale {SaleId}", id);
-                return StatusCode(500, new ErrorResponse("InternalServerError", "An error occurred while processing your request", ex.Message));
-            }
-        }
-
-        /// <summary>
-        /// Cancel a sale
-        /// </summary>
-        [HttpDelete("{id:guid}")]
-        public async Task<ActionResult> CancelSale(Guid id, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var command = new CancelSaleCommand(id);
-                await _mediator.Send(command, cancellationToken);
-                return Ok(new { message = "Sale cancelled successfully" });
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(new ErrorResponse("ResourceNotFound", "Sale not found", ex.Message));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error cancelling sale {SaleId}", id);
-                return StatusCode(500, new ErrorResponse("InternalServerError", "An error occurred while processing your request", ex.Message));
-            }
-        }
-
-        /// <summary>
-        /// Cancel a specific item in a sale
-        /// </summary>
-        [HttpDelete("{saleId:guid}/items/{productId:guid}")]
-        public async Task<ActionResult> CancelSaleItem(Guid saleId, Guid productId, CancellationToken cancellationToken = default)
-        {
-            try
-            {
-                var command = new CancelSaleItemCommand(saleId, productId);
-                await _mediator.Send(command, cancellationToken);
-                return Ok(new { message = "Sale item cancelled successfully" });
-            }
-            catch (NotFoundException ex)
-            {
-                return NotFound(new ErrorResponse("ResourceNotFound", "Sale or item not found", ex.Message));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error cancelling sale item. SaleId: {SaleId}, ProductId: {ProductId}", saleId, productId);
-                return StatusCode(500, new ErrorResponse("InternalServerError", "An error occurred while processing your request", ex.Message));
-            }
+                Success = false,
+                Message = "An error occurred while processing your request"
+            });
         }
     }
+
+    /// <summary>
+    /// Retrieves a sale by its ID
+    /// </summary>
+    /// <param name="id">The unique identifier of the sale</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The sale details if found</returns>
+    [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(ApiResponseWithData<GetSaleResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetSale([FromRoute] Guid id, CancellationToken cancellationToken = default)
+    {
+        var request = new GetSaleRequest { Id = id };
+        var validator = new GetSaleRequestValidator();
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Validation failed",
+                Errors = validationResult.Errors.Select(e => new ValidationErrorDetail
+                {
+                    Detail = e.PropertyName,
+                    Error = e.ErrorMessage
+                }).ToList()
+            });
+
+        try
+        {
+            var query = new GetSaleByIdQuery(id);
+            var result = await _mediator.Send(query, cancellationToken);
+
+            if (result == null)
+                return NotFound(new ApiResponse
+                {
+                    Success = false,
+                    Message = "Sale not found"
+                });
+
+            return Ok(new ApiResponseWithData<GetSaleResponse>
+            {
+                Success = true,
+                Message = "Sale retrieved successfully",
+                Data = _mapper.Map<GetSaleResponse>(result)
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting sale {SaleId}", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+            {
+                Success = false,
+                Message = "An error occurred while processing your request"
+            });
+        }
+    }
+
+    /// <summary>
+    /// Creates a new sale
+    /// </summary>
+    /// <param name="request">The sale creation request</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The created sale details</returns>
+    [HttpPost]
+    [ProducesResponseType(typeof(ApiResponseWithData<CreateSaleResponse>), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> CreateSale([FromBody] CreateSaleRequest request, CancellationToken cancellationToken = default)
+    {
+        var validator = new CreateSaleRequestValidator();
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Validation failed",
+                Errors = validationResult.Errors.Select(e => new ValidationErrorDetail
+                {
+                    Detail = e.PropertyName,
+                    Error = e.ErrorMessage
+                }).ToList()
+            });
+
+        try
+        {
+            var command = _mapper.Map<CreateSaleCommand>(request);
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return Created($"api/sales/{result.Id}", new ApiResponseWithData<CreateSaleResponse>
+            {
+                Success = true,
+                Message = "Sale created successfully",
+                Data = _mapper.Map<CreateSaleResponse>(result)
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogError(ex, "Erro interno ao criar venda: {Mensagem}", ex.Message);
+
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Invalid input data",
+                Errors = new List<ValidationErrorDetail>
+                {
+                    new ValidationErrorDetail
+                    {
+                        Detail = "Request",
+                        Error = ex.Message
+                    }
+                }
+            });
+        }
+        catch (Application.Exceptions.ApplicationException ex)
+        {
+            _logger.LogError(ex, "Business rule violation while creating sale: {Mensagem}", ex.Message);
+
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Business rule violation",
+                Errors = new List<ValidationErrorDetail>
+                {
+                    new ValidationErrorDetail
+                    {
+                        Detail = "BusinessRule",
+                        Error = ex.Message
+                    }
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro inesperado em CreateSale");
+
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+            {
+                Success = false,
+                Message = "Erro interno: " + ex.Message,
+                Errors = new List<ValidationErrorDetail>
+        {
+            new ValidationErrorDetail
+            {
+                Detail = "Exception",
+                Error = ex.ToString()
+            }
+        }
+            });
+        }
+
+    }
+
+    /// <summary>
+    /// Updates an existing sale
+    /// </summary>
+    /// <param name="id">The unique identifier of the sale to update</param>
+    /// <param name="request">The sale update request</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>The updated sale details</returns>
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(ApiResponseWithData<UpdateSaleResponse>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> UpdateSale(Guid id, [FromBody] UpdateSaleRequest request, CancellationToken cancellationToken = default)
+    {
+        var validator = new UpdateSaleRequestValidator();
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Validation failed",
+                Errors = validationResult.Errors.Select(e => new ValidationErrorDetail
+                {
+                    Detail = e.PropertyName,
+                    Error = e.ErrorMessage
+                }).ToList()
+            });
+
+        try
+        {
+            var command = _mapper.Map<UpdateSaleCommand>((id, request));
+            var result = await _mediator.Send(command, cancellationToken);
+
+            return Ok(new ApiResponseWithData<UpdateSaleResponse>
+            {
+                Success = true,
+                Message = "Sale updated successfully",
+                Data = _mapper.Map<UpdateSaleResponse>(result)
+            });
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new ApiResponse
+            {
+                Success = false,
+                Message = "Sale not found",
+                Errors = new List<ValidationErrorDetail>
+                {
+                    new ValidationErrorDetail
+                    {
+                        Detail = "Id",
+                        Error = ex.Message
+                    }
+                }
+            });
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Invalid input data",
+                Errors = new List<ValidationErrorDetail>
+                {
+                    new ValidationErrorDetail
+                    {
+                        Detail = "Request",
+                        Error = ex.Message
+                    }
+                }
+            });
+        }
+        catch (DomainException ex)
+        {
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Business rule violation",
+                Errors = new List<ValidationErrorDetail>
+                {
+                    new ValidationErrorDetail
+                    {
+                        Detail = "BusinessRule",
+                        Error = ex.Message
+                    }
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating sale {SaleId}", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+            {
+                Success = false,
+                Message = "An error occurred while processing your request"
+            });
+        }
+    }
+
+    /// <summary>
+    /// Cancels a sale by its ID
+    /// </summary>
+    /// <param name="id">The unique identifier of the sale to cancel</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>Success response if the sale was cancelled</returns>
+    [HttpDelete("{id:guid}")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> CancelSale([FromRoute] Guid id, CancellationToken cancellationToken = default)
+    {
+        var request = new CancelSaleRequest { Id = id };
+        var validator = new CancelSaleRequestValidator();
+        var validationResult = await validator.ValidateAsync(request, cancellationToken);
+
+        if (!validationResult.IsValid)
+            return BadRequest(new ApiResponse
+            {
+                Success = false,
+                Message = "Validation failed",
+                Errors = validationResult.Errors.Select(e => new ValidationErrorDetail
+                {
+                    Detail = e.PropertyName,
+                    Error = e.ErrorMessage
+                }).ToList()
+            });
+
+        try
+        {
+            var command = new CancelSaleCommand(id);
+            await _mediator.Send(command, cancellationToken);
+
+            return Ok(new ApiResponse
+            {
+                Success = true,
+                Message = "Sale cancelled successfully"
+            });
+        }
+        catch (NotFoundException ex)
+        {
+            return NotFound(new ApiResponse
+            {
+                Success = false,
+                Message = "Sale not found",
+                Errors = new List<ValidationErrorDetail>
+                {
+                    new ValidationErrorDetail
+                    {
+                        Detail = "Id",
+                        Error = ex.Message
+                    }
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error cancelling sale {SaleId}", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+            {
+                Success = false,
+                Message = "An error occurred while processing your request"
+            });
+        }
+    }
+
+    /// <summary>
+/// Cancel a specific item in a sale
+/// </summary>
+/// <param name="saleId">The unique identifier of the sale</param>
+/// <param name="productId">The unique identifier of the product to cancel</param>
+/// <param name="cancellationToken">Cancellation token</param>
+/// <returns>Success response if the sale item was cancelled</returns>
+[HttpDelete("{saleId:guid}/items/{productId:guid}")]
+[ProducesResponseType(typeof(ApiResponseWithData<ApiResponse>), StatusCodes.Status200OK)]
+[ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+[ProducesResponseType(typeof(ApiResponse), StatusCodes.Status500InternalServerError)]
+public async Task<IActionResult> CancelSaleItem(Guid saleId, Guid productId, CancellationToken cancellationToken = default)
+{
+    try
+    {
+        var command = new CancelSaleItemCommand(saleId, productId);
+        await _mediator.Send(command, cancellationToken);
+
+        var apiResponse = new ApiResponse
+        {
+            Success = true,
+            Message = "Sale item cancelled successfully"
+        };
+
+        return Ok(apiResponse);
+    }
+    catch (NotFoundException ex)
+    {
+        return NotFound(new ApiResponse
+        {
+            Success = false,
+            Message = "Sale or item not found",
+            Errors = new List<ValidationErrorDetail>
+            {
+                new ValidationErrorDetail
+                {
+                    Detail = "SaleId/ProductId",
+                    Error = ex.Message
+                }
+            }
+        });
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error cancelling sale item. SaleId: {SaleId}, ProductId: {ProductId}", saleId, productId);
+        return StatusCode(StatusCodes.Status500InternalServerError, new ApiResponse
+        {
+            Success = false,
+            Message = "An error occurred while processing your request"
+        });
+    }
+}
 }

@@ -57,7 +57,7 @@ namespace Ambev.DeveloperEvaluation.Unit
 
             // Assert
             var createdResult = Assert.IsType<CreatedResult>(result);
-            var apiResponse = Assert.IsType<ApiResponseWithData<CreateUserResponse>>(createdResult.Value);
+            var apiResponse = Assert.IsType<WebApi.Common.ApiResponseWithData<CreateUserResponse>>(createdResult.Value);
             Assert.True(apiResponse.Success);
             Assert.Equal("User created successfully", apiResponse.Message);
             Assert.Equal(response.Id, apiResponse.Data.Id);
@@ -137,7 +137,7 @@ namespace Ambev.DeveloperEvaluation.Unit
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var apiResponse = Assert.IsType<ApiResponseWithData<ApiResponse>>(okResult.Value);
+            var apiResponse = Assert.IsType<WebApi.Common.ApiResponseWithData<WebApi.Common.ApiResponse>>(okResult.Value);
 
             Assert.NotNull(apiResponse.Data); // Ensure Data is not null
             Assert.Equal("User deleted successfully", apiResponse.Data.Message);

@@ -27,7 +27,6 @@ namespace Ambev.DeveloperEvaluation.Application.Handlers
 
         public async Task<SaleDto> Handle(CreateSaleCommand request, CancellationToken cancellationToken)
         {
-            // Check if sale number already exists
             var existingSale = await _saleRepository.GetBySaleNumberAsync(request.SaleNumber, cancellationToken);
             if (existingSale != null)
                 throw new ApplicationException($"Sale with number {request.SaleNumber} already exists");

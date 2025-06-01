@@ -28,8 +28,7 @@ namespace Ambev.DeveloperEvaluation.Application.Handlers
             if (sale == null)
                 throw new NotFoundException($"Sale with ID {request.Id} not found");
 
-            sale.Cancel();
-            await _saleRepository.UpdateAsync(sale, cancellationToken);
+            await _saleRepository.CancelAsync(sale, cancellationToken);
             await _eventDispatcher.DispatchEventsAsync(sale, cancellationToken);
 
             return true;

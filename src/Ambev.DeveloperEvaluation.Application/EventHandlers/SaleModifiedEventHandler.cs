@@ -20,7 +20,6 @@ namespace Ambev.DeveloperEvaluation.Application.EventHandlers
                 notification.SaleId,
                 notification.SaleNumber);
 
-            // Here you could publish to a message broker, update read models, etc.
             return Task.CompletedTask;
         }
     }
