@@ -23,9 +23,6 @@ namespace Ambev.DeveloperEvaluation.Application.EventHandlers
                 notification.BranchId,
                 notification.SaleDate);
 
-            // Here you could publish to a message broker, send notifications, etc.
-            // For now, we're just logging as requested in the requirements
-
             return Task.CompletedTask;
         }
     }

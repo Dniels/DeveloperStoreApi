@@ -436,12 +436,6 @@ public async Task<IActionResult> CancelSaleItem(Guid saleId, Guid productId, Can
             Message = "Sale item cancelled successfully"
         };
 
-        // DEBUG: Logs para verificar o que está sendo enviado
-        _logger.LogInformation($"DEBUG - Response Success: {apiResponse.Success}");
-        _logger.LogInformation($"DEBUG - Response Message: '{apiResponse.Message}'");
-        _logger.LogInformation($"DEBUG - Response Message Length: {apiResponse.Message.Length}");
-
-        // CORREÇÃO: Usar o método Ok<T> customizado do BaseController
         return Ok(apiResponse);
     }
     catch (NotFoundException ex)

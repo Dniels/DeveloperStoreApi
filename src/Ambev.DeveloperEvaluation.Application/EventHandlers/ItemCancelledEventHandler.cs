@@ -21,7 +21,6 @@ namespace Ambev.DeveloperEvaluation.Application.EventHandlers
                 notification.SaleNumber,
                 notification.ProductId);
 
-            // Here you could update inventory, notify warehouse, etc.
             return Task.CompletedTask;
         }
     }

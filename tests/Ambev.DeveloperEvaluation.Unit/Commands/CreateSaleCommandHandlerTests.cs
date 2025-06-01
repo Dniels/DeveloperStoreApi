@@ -57,8 +57,6 @@ namespace Ambev.DeveloperEvaluation.Unit.Commands
             // Assert
             Assert.NotNull(result);
             Assert.Equal(command.SaleNumber, result.SaleNumber);
-            //await _saleRepository.Received(1).AddAsync(Arg.Any<Sale>());
-            //await _mediator.Received(1).Publish(Arg.Any<SaleCreatedEvent>(), Arg.Any<CancellationToken>());
         }
 
         [Fact]
