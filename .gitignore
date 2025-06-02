@@ -375,6 +375,4 @@ FodyWeavers.xsd
 /tests/Ambev.DeveloperEvaluation.Integration/obj/Debug/net8.0/Ambev.DeveloperEvaluation.Integration.assets.cache
 /.vs/Ambev.DeveloperEvaluation/v17/.futdcache.v2
 
-/.vs/
-/bin/
-/obj/
+
