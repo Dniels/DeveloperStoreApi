@@ -46,7 +46,7 @@ public class Program
             builder.Services.AddDbContext<DefaultContext>(options =>
                 options.UseNpgsql(
                     builder.Configuration.GetConnectionString("DefaultConnection"),
-                    b => b.MigrationsAssembly("Ambev.DeveloperEvaluation.WebApi")
+                    b => b.MigrationsAssembly("Ambev.DeveloperEvaluation.ORM")
                 )
             );
 
