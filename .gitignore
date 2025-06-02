@@ -361,8 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/src/Ambev.DeveloperEvaluation.WebApi/obj/Debug/net8.0/Ambev.DeveloperEvaluation.WebApi.csproj.FileListAbsolute.txt
-/src/Ambev.DeveloperEvaluation.WebApi/obj/Debug/net8.0/apphost.exe
 /tests/Ambev.DeveloperEvaluation.Functional/obj/Debug/net8.0/Ambev.DeveloperEvaluation.Functional.assets.cache
 /tests/Ambev.DeveloperEvaluation.Integration/obj/Debug/net8.0/Ambev.DeveloperEvaluation.Integration.csproj.FileListAbsolute.txt
 /.vs/Ambev.DeveloperEvaluation/DesignTimeBuild/.dtbcache.v2
@@ -375,4 +373,10 @@ FodyWeavers.xsd
 /tests/Ambev.DeveloperEvaluation.Integration/obj/Debug/net8.0/Ambev.DeveloperEvaluation.Integration.assets.cache
 /.vs/Ambev.DeveloperEvaluation/v17/.futdcache.v2
 
+/src/Ambev.DeveloperEvaluation.WebApi/obj
+/src/Ambev.DeveloperEvaluation.Aplication/obj
+/src/Ambev.DeveloperEvaluation.Domain/obj
+/src/Ambev.DeveloperEvaluation.Common/obj
+/src/Ambev.DeveloperEvaluation.IoC/obj
+/src/Ambev.DeveloperEvaluation.ORM/obj
 
