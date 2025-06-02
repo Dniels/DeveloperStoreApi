@@ -6,8 +6,8 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Ambev.DeveloperEvaluation.ORM.Migrations
 {
-    [ExcludeFromCodeCoverage]
     /// <inheritdoc />
+    [ExcludeFromCodeCoverage]
     public partial class InitialMigrations : Migration
     {
         /// <inheritdoc />
@@ -33,6 +33,7 @@ namespace Ambev.DeveloperEvaluation.ORM.Migrations
         }
 
         /// <inheritdoc />
+        [ExcludeFromCodeCoverage]
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
