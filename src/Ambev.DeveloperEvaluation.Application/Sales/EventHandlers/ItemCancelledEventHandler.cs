@@ -2,7 +2,7 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace Ambev.DeveloperEvaluation.Application.EventHandlers
+namespace Ambev.DeveloperEvaluation.Application.Sales.EventHandlers
 {
     public class ItemCancelledEventHandler : INotificationHandler<ItemCancelledEvent>
     {

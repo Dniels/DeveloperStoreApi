@@ -1,5 +1,5 @@
-﻿using Ambev.DeveloperEvaluation.Application.Commands;
-using Ambev.DeveloperEvaluation.Application.DTOs;
+﻿using Ambev.DeveloperEvaluation.Application.DTOs;
+using Ambev.DeveloperEvaluation.Application.Sales.Commands;
 using Ambev.DeveloperEvaluation.Application.Services;
 using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
@@ -7,7 +7,7 @@ using Ambev.DeveloperEvaluation.Domain.ValueObjects;
 using AutoMapper;
 using MediatR;
 
-namespace Ambev.DeveloperEvaluation.Application.Handlers
+namespace Ambev.DeveloperEvaluation.Application.Sales.Handlers
 {
     public class CreateSaleCommandHandler : IRequestHandler<CreateSaleCommand, SaleDto>
     {

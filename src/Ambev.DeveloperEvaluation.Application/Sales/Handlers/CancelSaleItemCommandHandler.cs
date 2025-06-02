@@ -1,10 +1,10 @@
-﻿using Ambev.DeveloperEvaluation.Application.Commands;
-using Ambev.DeveloperEvaluation.Application.Exceptions;
+﻿using Ambev.DeveloperEvaluation.Application.Exceptions;
+using Ambev.DeveloperEvaluation.Application.Sales.Commands;
 using Ambev.DeveloperEvaluation.Application.Services;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using MediatR;
 
-namespace Ambev.DeveloperEvaluation.Application.Handlers
+namespace Ambev.DeveloperEvaluation.Application.Sales.Handlers
 {
     public class CancelSaleItemCommandHandler : IRequestHandler<CancelSaleItemCommand, bool>
     {

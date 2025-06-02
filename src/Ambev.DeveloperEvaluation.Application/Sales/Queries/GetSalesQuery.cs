@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ambev.DeveloperEvaluation.Application.Queries
+namespace Ambev.DeveloperEvaluation.Application.Sales.Queries
 {
     public record GetSalesQuery(
     int Page = 1,

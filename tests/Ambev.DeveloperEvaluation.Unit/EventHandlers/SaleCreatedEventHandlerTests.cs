@@ -1,4 +1,4 @@
-﻿using Ambev.DeveloperEvaluation.Application.EventHandlers;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.EventHandlers;
 using Ambev.DeveloperEvaluation.Domain.Events;
 using Microsoft.Extensions.Logging;
 using NSubstitute;

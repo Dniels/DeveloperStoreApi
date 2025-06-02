@@ -1,10 +1,10 @@
 ﻿using Ambev.DeveloperEvaluation.Application.DTOs;
-using Ambev.DeveloperEvaluation.Application.Queries;
+using Ambev.DeveloperEvaluation.Application.Sales.Queries;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using AutoMapper;
 using MediatR;
 
-namespace Ambev.DeveloperEvaluation.Application.Handlers
+namespace Ambev.DeveloperEvaluation.Application.Sales.Handlers
 {
     public class GetSaleByIdQueryHandler : IRequestHandler<GetSaleByIdQuery, SaleDto?>
     {
