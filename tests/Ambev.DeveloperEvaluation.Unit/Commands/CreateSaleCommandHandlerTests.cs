@@ -1,5 +1,5 @@
-﻿using Ambev.DeveloperEvaluation.Application.Commands;
-using Ambev.DeveloperEvaluation.Application.Handlers;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.Commands;
+using Ambev.DeveloperEvaluation.Application.Sales.Handlers;
 using Ambev.DeveloperEvaluation.Application.Services;
 using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Events;

@@ -1,16 +1,10 @@
-﻿using Ambev.DeveloperEvaluation.Application.Handlers;
-using Ambev.DeveloperEvaluation.Application.Queries;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.Queries;
+using Ambev.DeveloperEvaluation.Application.Sales.Handlers;
 using Ambev.DeveloperEvaluation.Domain.Entities;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using Ambev.DeveloperEvaluation.Unit.Builders;
 using Ambev.DeveloperEvaluation.Unit.Common;
-using AutoMapper;
 using NSubstitute;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Ambev.DeveloperEvaluation.Unit.Queries

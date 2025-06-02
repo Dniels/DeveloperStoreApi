@@ -1,4 +1,4 @@
-﻿using Ambev.DeveloperEvaluation.Application.Mappings;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.Mappings;
 using AutoMapper;
 
 namespace Ambev.DeveloperEvaluation.Unit.Common

@@ -1,5 +1,5 @@
 ﻿using Ambev.DeveloperEvaluation.Application.DTOs;
-using Ambev.DeveloperEvaluation.Application.Queries;
+using Ambev.DeveloperEvaluation.Application.Sales.Queries;
 using Ambev.DeveloperEvaluation.Domain.Repositories;
 using AutoMapper;
 using MediatR;
@@ -9,7 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ambev.DeveloperEvaluation.Application.Handlers
+namespace Ambev.DeveloperEvaluation.Application.Sales.Handlers
 {
     public class GetSalesQueryHandler : IRequestHandler<GetSalesQuery, PagedResult<SaleDto>>
     {

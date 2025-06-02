@@ -1,5 +1,5 @@
-﻿using Ambev.DeveloperEvaluation.Application.Commands;
-using Ambev.DeveloperEvaluation.Application.DTOs;
+﻿using Ambev.DeveloperEvaluation.Application.DTOs;
+using Ambev.DeveloperEvaluation.Application.Sales.Commands;
 using Ambev.DeveloperEvaluation.WebApi.Models;
 using AutoMapper;
 

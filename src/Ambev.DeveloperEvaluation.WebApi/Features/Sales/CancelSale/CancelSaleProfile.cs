@@ -1,4 +1,4 @@
-﻿using Ambev.DeveloperEvaluation.Application.Commands;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.Commands;
 using AutoMapper;
 
 namespace Ambev.DeveloperEvaluation.WebApi.Features.Sales.CancelSale

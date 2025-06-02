@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Ambev.DeveloperEvaluation.Application.EventHandlers
+namespace Ambev.DeveloperEvaluation.Application.Sales.EventHandlers
 {
     public class SaleCancelledEventHandler : INotificationHandler<SaleCancelledEvent>
     {

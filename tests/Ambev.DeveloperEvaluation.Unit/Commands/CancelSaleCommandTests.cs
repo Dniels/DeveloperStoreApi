@@ -1,4 +1,4 @@
-﻿using Ambev.DeveloperEvaluation.Application.Commands;
+﻿using Ambev.DeveloperEvaluation.Application.Sales.Commands;
 using FluentAssertions;
 using MediatR;
 using System;
