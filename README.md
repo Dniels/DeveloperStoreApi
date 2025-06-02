@@ -81,19 +81,18 @@ cd DeveloperStoreApi
 
 3. Execute as migrações do banco:
 ```bash
-dotnet ef database update
+dotnet ef database update --startup-project src\Ambev.DeveloperEvaluation.WebApi --project src\Ambev.DeveloperEvaluation.ORM
 ```
 
 4. Execute a aplicação:
 ```bash
-dotnet run --project src/DeveloperStore.Sales.API
+dotnet run --project src\Ambev.DeveloperEvaluation.WebApi
 ```
 
 ### Executando os Testes
 
 ```bash
-# Todos os testes
-dotnet test
+dotnet test tests\Ambev.DeveloperEvaluation.Unit\Ambev.DeveloperEvaluation.Unit.csproj
 ```
 
 ##  API Endpoints
